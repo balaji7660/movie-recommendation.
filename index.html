@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="referrer" content="no-referrer">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CineWorld – Real-Time Movie Discovery</title>
+  <meta name="description" content="Discover millions of movies from every language and country – trailers, cast, streaming platforms, upcoming releases."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ──────── API SETUP SCREEN ──────── -->
+<div id="setupScreen" class="setup-screen">
+  <div class="setup-card">
+    <div class="setup-logo">🎬 CineWorld</div>
+    <h1>Welcome to CineWorld</h1>
+    <p>Discover <strong>500,000+ real movies & TV shows</strong> from every corner of the world. Explore deep trailers, full cast, streaming platforms, and upcoming releases in real-time.</p>
+    <div class="setup-steps">
+      <div class="step"><span class="step-num">1</span><span>Create a <strong>free account</strong> on the movie portal</span></div>
+      <div class="step"><span class="step-num">2</span><span>Verify your email → go to <strong>Settings → API → Request Key</strong></span></div>
+      <div class="step"><span class="step-num">3</span><span>Choose <strong>Developer</strong> → fill the form:<br/>
+        &nbsp;&nbsp;• <strong>Application Name:</strong> CineWorld<br/>
+        &nbsp;&nbsp;• <strong>Application URL:</strong> <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;color:#10b981">http://localhost</code></span></div>
+      <div class="step"><span class="step-num">4</span><span>After submitting, copy your <strong>TMDB Access Key</strong>.</span></div>
+      <div class="step"><span class="step-num">5</span><span>(Optional) Use a <strong>YouTube API Key</strong> to fix trailer playback errors.</span></div>
+      <div class="step"><span class="step-num">6</span><span>Paste your keys below and click Launch 🚀</span></div>
+    </div>
+    <div class="setup-tip">
+      💡 <strong>Access Key Tip:</strong> Use the developer portal to generate a free key for your project. Use <strong>http://localhost</strong> as the callback URL.
+    </div>
+    <div class="setup-input-wrap" style="flex-direction:column; gap:12px;">
+      <input type="text" id="apiKeyInput" placeholder="Paste TMDB Access Key here..." autocomplete="off"/>
+      <input type="text" id="ytApiKeyInput" placeholder="Paste YouTube API Key (Optional) - Fixing 301/153 errors" autocomplete="off" style="font-size:0.8rem; height:40px;"/>
+      <button id="launchBtn" onclick="launchApp()" style="height:50px; width:100%;">🚀 Launch Application</button>
+    </div>
+    <div id="setupError" class="setup-error" style="display:none">Invalid API key. Please check and try again.</div>
+    <p class="setup-note">Your key is stored only in your browser's localStorage. No data is sent anywhere else.</p>
+  </div>
+</div>
+
+<!-- ──────── MAIN APP ──────── -->
+<div id="mainApp" style="display:none">
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-left">
+      <div class="nav-brand" onclick="scrollToTop()">🎬 CineWorld</div>
+      <ul class="nav-links">
+        <li><a href="#" onclick="loadSection('trending')">Trending</a></li>
+        <li><a href="#" onclick="loadSection('tv_trending')">Web Series</a></li>
+        <li><a href="#" onclick="loadSection('now_playing')">Now Playing</a></li>
+        <li><a href="#" onclick="loadSection('upcoming')">Upcoming</a></li>
+        <li><a href="#" onclick="loadSection('top_rated')">Top Rated</a></li>
+      </ul>
+    </div>
+    <div class="nav-right">
+      <div class="live-indicator"><span class="live-dot"></span> LIVE DATA</div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="globalSearch" placeholder="Search millions of movies..." autocomplete="off"/>
+        <div id="searchResults" class="search-dropdown"></div>
+      </div>
+      <select id="langFilter" class="nav-sel" onchange="onLangChange()">
+        <option value="">🌍 All Languages</option>
+      </select>
+      <button class="logout-btn" onclick="logout()" title="Change API key">⚙️</button>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <section class="hero-banner" id="heroBanner">
+    <div class="hero-gradient"></div>
+    <div id="heroContent" class="hero-content-inner">
+      <div class="hero-skeleton"></div>
+    </div>
+  </section>
+
+  <!-- GENRE FILTER PILLS -->
+  <div class="genre-bar" id="genreBar">
+    <div style="padding: 10px 32px 0; color: var(--text2); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+      🌍 Available in All Global & Regional Languages (Hindi, Telugu, Tamil, Kannada, Malayalam, Korean, etc.)
+    </div>
+    <div class="genre-bar-inner" id="genreInner"></div>
+  </div>
+
+  <!-- CONTENT ROWS -->
+  <main class="main-content" id="mainContent">
+
+    <div class="row-section" id="trendingRow">
+      <div class="row-header"><h2>🔥 Trending Today</h2><button onclick="loadSection('trending')">See All →</button></div>
+      <div class="row-cards" id="trendingCards"></div>
+    </div>
+
+    <div class="row-section" id="nowPlayingRow">
+      <div class="row-header"><h2>🎬 Now In Cinemas</h2><button onclick="loadSection('now_playing')">See All →</button></div>
+      <div class="row-cards" id="nowPlayingCards"></div>
+    </div>
+
+    <div class="row-section" id="freeRow">
+      <div class="row-header"><h2>🆓 Free to Watch</h2><button onclick="loadSection('free')">See All →</button></div>
+      <div class="row-cards" id="freeCards"></div>
+    </div>
+
+    <div class="row-section" id="tvTrendingRow">
+      <div class="row-header"><h2>📺 Trending Web Series</h2><button onclick="loadSection('tv_trending')">See All →</button></div>
+      <div class="row-cards" id="tvTrendingCards"></div>
+    </div>
+
+    <div class="row-section" id="tvPopularRow">
+      <div class="row-header"><h2>🔥 Popular TV Shows</h2><button onclick="loadSection('tv_popular')">See All →</button></div>
+      <div class="row-cards" id="tvPopularCards"></div>
+    </div>
+
+    <div class="row-section" id="upcomingRow">
+      <div class="row-header"><h2>📅 Upcoming & Teasers</h2><button onclick="loadSection('upcoming')">See All →</button></div>
+      <div class="row-cards" id="upcomingCards"></div>
+    </div>
+
+    <div class="row-section" id="topRatedRow">
+      <div class="row-header"><h2>⭐ Top Rated All Time</h2><button onclick="loadSection('top_rated')">See All →</button></div>
+      <div class="row-cards" id="topRatedCards"></div>
+    </div>
+
+    <div class="row-section" id="bollywoodRow">
+      <div class="row-header"><h2>🎭 Bollywood (Hindi)</h2><button onclick="seeAll('discover/movie?with_original_language=hi')">See All →</button></div>
+      <div class="row-cards" id="bollywoodCards"></div>
+    </div>
+
+    <div class="row-section" id="tollywoodRow">
+      <div class="row-header"><h2>🌟 Tollywood (Telugu)</h2><button onclick="seeAll('discover/movie?with_original_language=te')">See All →</button></div>
+      <div class="row-cards" id="tollywoodCards"></div>
+    </div>
+
+    <div class="row-section" id="kollywoodRow">
+      <div class="row-header"><h2>🔥 Kollywood (Tamil)</h2><button onclick="seeAll('discover/movie?with_original_language=ta')">See All →</button></div>
+      <div class="row-cards" id="kollywoodCards"></div>
+    </div>
+
+    <div class="row-section" id="mollywoodRow">
+      <div class="row-header"><h2>💜 Mollywood (Malayalam)</h2><button onclick="seeAll('discover/movie?with_original_language=ml')">See All →</button></div>
+      <div class="row-cards" id="mollywoodCards"></div>
+    </div>
+
+    <div class="row-section" id="sandalwoodRow">
+      <div class="row-header"><h2>⭐ Sandalwood (Kannada)</h2><button onclick="seeAll('discover/movie?with_original_language=kn')">See All →</button></div>
+      <div class="row-cards" id="sandalwoodCards"></div>
+    </div>
+
+    <div class="row-section" id="koreanRow">
+      <div class="row-header"><h2>🌸 Korean Cinema (Movies)</h2><button onclick="seeAll('discover/movie?with_original_language=ko')">See All →</button></div>
+      <div class="row-cards" id="koreanCards"></div>
+    </div>
+
+    <div class="row-section" id="kdramaRow">
+      <div class="row-header"><h2>🎭 Popular K-Dramas (TV)</h2><button onclick="seeAll('discover/tv?with_original_language=ko&sort_by=popularity.desc')">See All →</button></div>
+      <div class="row-cards" id="kdramaCards"></div>
+    </div>
+
+    <div class="row-section" id="japaneseRow">
+      <div class="row-header"><h2>🗾 Japanese Cinema</h2><button onclick="seeAll('discover/movie?with_original_language=ja')">See All →</button></div>
+      <div class="row-cards" id="japaneseCards"></div>
+    </div>
+
+    <div class="row-section" id="frenchRow">
+      <div class="row-header"><h2>🗼 French Cinema</h2><button onclick="seeAll('discover/movie?with_original_language=fr')">See All →</button></div>
+      <div class="row-cards" id="frenchCards"></div>
+    </div>
+
+    <div class="row-section" id="spanishRow">
+      <div class="row-header"><h2>🌮 Spanish Cinema</h2><button onclick="seeAll('discover/movie?with_original_language=es')">See All →</button></div>
+      <div class="row-cards" id="spanishCards"></div>
+    </div>
+
+    <!-- GENRE SPECIFIC ROWS (Showing 500k+ Database depth) -->
+    <div class="row-section" id="actionRow">
+      <div class="row-header"><h2>💥 Explosive Action</h2><button onclick="seeAll('discover/movie?with_genres=28')">See All →</button></div>
+      <div class="row-cards" id="actionCards"></div>
+    </div>
+
+    <div class="row-section" id="comedyRow">
+      <div class="row-header"><h2>😂 Pure Comedy</h2><button onclick="seeAll('discover/movie?with_genres=35')">See All →</button></div>
+      <div class="row-cards" id="comedyCards"></div>
+    </div>
+
+    <div class="row-section" id="scifiRow">
+      <div class="row-header"><h2>🚀 Sci-Fi & Future</h2><button onclick="seeAll('discover/movie?with_genres=878')">See All →</button></div>
+      <div class="row-cards" id="scifiCards"></div>
+    </div>
+
+    <div class="row-section" id="horrorRow">
+      <div class="row-header"><h2>👻 Spine-Chilling Horror</h2><button onclick="seeAll('discover/movie?with_genres=27')">See All →</button></div>
+      <div class="row-cards" id="horrorCards"></div>
+    </div>
+
+    <!-- SEE ALL GRID VIEW -->
+    <div class="grid-section" id="gridSection" style="display:none">
+      <div class="grid-header">
+        <button onclick="closeGrid()">← Back</button>
+        <h2 id="gridTitle">All Movies</h2>
+        <button class="csv-btn" onclick="downloadCSV()">📥 Collect Dataset (CSV)</button>
+        <div class="grid-filters">
+          <select id="gridYear" onchange="applyGridFilters()">
+            <option value="">All Years</option>
+          </select>
+          <select id="gridSort" onchange="applyGridFilters()">
+            <option value="popularity.desc">Most Popular</option>
+            <option value="vote_average.desc">Highest Rated</option>
+            <option value="release_date.desc">Newest First</option>
+            <option value="release_date.asc">Oldest First</option>
+          </select>
+        </div>
+      </div>
+      <div class="movie-grid-view" id="movieGridView"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">🎬 CineWorld – Global Movie Discovery</div>
+      <p>Explore millions of movies and TV shows from around the world.</p>
+      <p>© 2026 CineWorld · NRCM ML Project · All Languages Supported</p>
+    </div>
+  </footer>
+
+</div><!-- /mainApp -->
+
+<!-- ──────── MOVIE DETAIL MODAL ──────── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close-btn" onclick="closeModalBtn()">✕</button>
+    <div id="modalInner"></div>
+  </div>
+</div>
+
+<!-- LOADING SPINNER -->
+<div class="global-loader" id="globalLoader" style="display:none">
+  <div class="spinner"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
