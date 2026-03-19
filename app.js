@@ -145,7 +145,6 @@ async function initApp() {
   // Initialize UI components
   updateSearchTags();
   renderWatchlist();
-  initVoiceSearch();
 
   const counter = document.getElementById('resultsCount');
   if (counter) {
@@ -203,49 +202,6 @@ function clearWatchlist() {
     }
 }
 
-// ── Voice Search (Speech-to-Text) ─────────────────────────────
-function initVoiceSearch() {
-    const btn = document.getElementById('voiceSearchBtn');
-    const input = document.getElementById('globalSearch');
-    const recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (!recognition) {
-        btn.style.display = 'none';
-        return;
-    }
-    
-    const rec = new recognition();
-    rec.continuous = false;
-    rec.lang = 'en-US';
-    
-    btn.onclick = () => {
-        try {
-            rec.start();
-            btn.classList.add('recording');
-            btn.textContent = '🛑';
-        } catch(e) { rec.stop(); }
-    };
-    
-    rec.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        input.value = text;
-        liveSearch(text);
-        logSearch(text);
-        btn.textContent = '🎙️';
-        btn.classList.remove('recording');
-    };
-    
-    rec.onspeechend = () => {
-        rec.stop();
-        btn.textContent = '🎙️';
-        btn.classList.remove('recording');
-    };
-    
-    rec.onerror = () => {
-        btn.textContent = '🎙️';
-        btn.classList.remove('recording');
-    };
-}
 
 // ── Search History & Tracking ──────────────────────────────────
 function logSearch(q) {
