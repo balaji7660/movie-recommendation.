@@ -223,73 +223,7 @@
       <div class="pagination" id="pagination"></div>
     </div>
 
-    <!-- 🤖 CINEMATCH AI SECTION (ML Recommendation Engine) -->
-    <section class="tool-section" id="recommend">
-      <div class="section-title-wrap">
-        <h2>🤖 CineMatch AI</h2>
-        <p>Our custom ML engine calculates high-accuracy similarity scores based on genre overlap, industry, release era, and global ratings.</p>
-      </div>
-      
-      <div class="rec-tool-wrap">
-        <div class="rec-search-col">
-          <div style="font-size:0.9rem; font-weight:700; color:#fff">Select a Movie to Analyze</div>
-          <div class="rec-search-wrap">
-            <input type="text" id="recSearchInput" placeholder="Type a movie title (e.g. Inception)..." autocomplete="off"/>
-            <div id="recDropdown" class="rec-dropdown"></div>
-          </div>
-          
-          <div class="rec-prefs">
-            <div style="font-size:0.8rem; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:5px">ML Weight Preferences</div>
-            <label class="pref-item"><input type="checkbox" id="prefSameIndustry" checked> Prioritize Same Industry (+20%)</label>
-            <label class="pref-item"><input type="checkbox" id="prefSameLang" checked> Match Original Language (+15%)</label>
-            <label class="pref-item"><input type="checkbox" id="prefSameEra" checked> Release Era Proximity (+15%)</label>
-          </div>
 
-          <div id="selectedMovieCard" class="selected-movie-card"></div>
-          <button id="getRecBtn" class="btn-get-rec" disabled>🚀 Calculate Similarities</button>
-        </div>
-
-        <div class="rec-results-col">
-          <div style="font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:15px">Top ML Matches</div>
-          <div id="recResults" class="rec-results-grid">
-            <div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--text3); border:1px dashed var(--border); border-radius:12px">
-              Select a movie on the left to see AI-driven recommendations.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 📊 ANALYTICS DASHBOARD -->
-    <section class="tool-section" id="analytics">
-      <div class="section-title-wrap">
-        <h2>📊 Real-Time Analytics</h2>
-        <p>Live distribution analysis of the curated ML dataset across global industries and streaming platforms.</p>
-      </div>
-
-      <div class="charts-grid">
-        <div class="chart-card">
-          <h3>Movie Industries</h3>
-          <div id="industryChart"></div>
-        </div>
-        <div class="chart-card">
-          <h3>Top Languages</h3>
-          <div id="languageChart"></div>
-        </div>
-        <div class="chart-card">
-          <h3>Genre Popularity</h3>
-          <div id="genreChart"></div>
-        </div>
-        <div class="chart-card">
-          <h3>Streaming Availability</h3>
-          <div id="streamingChart"></div>
-        </div>
-        <div class="chart-card">
-          <h3>Global User Activity (Simulated)</h3>
-          <div id="userActivityChart"></div>
-        </div>
-      </div>
-    </section>
 
   </main>
 
